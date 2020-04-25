@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Covid-19 Information</title>
+</head>
+<body bgcolor="#00FA9A">
+	<!-- membuat layout untuk menampilkan global informasi -->
+	<center><h2><b><i>INFORMASI GLOBAL</i></b></h2></center>
+	<center>
+	<table>
+		<tbody>
+			<tr>
+				<td>Kasus</td>
+				<td id="global-kasus"> : 0</td>
+			</tr>
+			<tr>
+				<td>Meninggal</td>
+				<td id="global-meninggal"> : 0</td>
+			</tr>
+			<tr>
+				<td>Pulih</td>
+				<td id="global-pulih"> : 0</td>
+			</tr>
+		</tbody>	
+	</table>
+
+	<!-- membuat data info penularan covid-19 -->
+	<table border="1">
+		<thead>
+			<tr>
+				<th>No.</th>
+				<th>Negara</th>
+				<th>Kasus</th>
+				<th>Kasus Hari Ini</th>
+				<th>Aktif</th>
+				<th>Meninggal</th>
+				<th>Meninggal Hari Ini</th>
+				<th>Pulih</th>
+				<th>Kritis</th>
+			</tr>
+		</thead>
+		<tbody id="daftar-negara">
+		</tbody>
+	</table>
+	
+	<!-- import jquery -->
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+	<script>
+
+		//panggil fungsi globalInfo ketika halaman telah berhasil di load
+		$(document).ready(function(){
+			getGlobalInfo(); //memanggil fungsi globalInfo
+			getCountryInfo(); //memanggil fungsi getCountry
+		});
+
+		//membuat fungsi untuk mendapatkan jumlah global
+		function getGlobalInfo(){
+			$.ajax({
+				url : 'https://coronavirus-19-api.herokuapp.com/all',
+				success: function (data) {
+
+				try{
+					var json = data;
+
+					var kasus = json.cases;
+					var meninggal = json.deaths;
+					var pulih = json.recovered;
+
+					$("#global-kasus").html(" : " + kasus);
+					$("#global-meninggal").html(" : " + meninggal);
+					$("#global-pulih").html(" : " + pulih);
+					}catch(e){
+						alert("Gagal mendapatkan data dari server");
+					}
+				
+			}, error : function(resp) {
+
+			}
+			});
+		}
+		//membuat fungsi untuk mendapatkan jumlah berdasarkan negara
+		function getCountryInfo(){
+			$.ajax({
+			url: 'https://coronavirus-19-api.herokuapp.com/countries',
+			success: function (data) {
+
+				try{
+					var json = data;
+
+					if(json.length > 0) { //set variable html sebagai array
+
+						var i;
+						for(i = 0; i<json.length; i++){
+							var html = []; //set variable sebagai array
+
+							var dataNegara = json[i];
+
+							var no = i+1;
+
+							//data ini diambil berdasarkan data json yang tamoil setelah mengakses
+							//https://coronavirus-19-api.herokuapp.com/countries
+							var namaNegara = dataNegara.country;
+							var kasus = dataNegara.cases;
+							var kasusHariIni = dataNegara.todayCases;
+							var active = dataNegara.active;
+							var meninggal = dataNegara.deaths;
+							var meninggalHariIni = dataNegara.todayDeaths;
+							var pulih = dataNegara.recovered;
+							var kritis = dataNegara.critical;
+
+							//memasukkan data di atas ke dalam table
+							html.push("<tr>"); //membuka baris
+								html.push("<td>" + no + "</td>"); //membuat kolom no
+								html.push("<td>" + namaNegara + "</td>"); //membuat kolom namaNegara
+								html.push("<td>" + kasus + "</td>"); //membuat kolom kasus
+								html.push("<td>" + kasusHariIni + "</td>"); //membuat kolom kasusHarIni
+								html.push("<td>" + active + "</td>"); //membuat kolom active
+								html.push("<td>" + meninggal + "</td>"); //membuat kolom meninggal
+								html.push("<td>" + meninggalHariIni + "</td>"); //membuat kolom meninggalHariIni
+								html.push("<td>" + pulih + "</td>"); //membuat kolom pulih
+								html.push("<td>" + kritis + "</td>"); //membuat kolom kritis
+							html.push("</tr>"); //menutup baris
+
+							//menambahakn tiap-tiap baris ke dalam table-body
+							$("#daftar-negara").append(html.join(""));
+
+						}
+					}
+					}catch(e){
+						
+					}
+				
+			}, error : function() {
+
+			}
+			});
+		}
+	</script>
+</center>
+</body>
+</html>
